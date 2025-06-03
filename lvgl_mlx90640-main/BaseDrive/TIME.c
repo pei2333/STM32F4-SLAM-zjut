@@ -15,7 +15,7 @@
 输出参数：无
 定时器：TIM2（1ms中断）
 **********************************************************************************************************/
-void TIM2_Configuration(void)
+void TIM2_Init(void)
 {
     TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
     NVIC_InitTypeDef NVIC_InitStructure;
@@ -57,11 +57,11 @@ void TIM2_Configuration(void)
 }
 
 /**********************************************************************************************************
-函数名称：TIM3定时器配置（200Hz，5ms中断用于ADXL345数据采集）
+函数名称：TIM3定时器初始化（200Hz，5ms中断用于ADXL345数据采集）
 输入参数：无
 输出参数：无
 **********************************************************************************************************/
-void TIM3_Configuration(void)
+void TIM3_Init(void)
 {
     TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
     NVIC_InitTypeDef NVIC_InitStructure;

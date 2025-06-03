@@ -2,7 +2,7 @@
 #define _LED_H_
 
 
-/*Ó²¼þ×ÊÔ´Òý½Å¶¨Òå
+/*Ó²ï¿½ï¿½ï¿½ï¿½Ô´ï¿½ï¿½ï¿½Å¶ï¿½ï¿½ï¿½
 //LED1      PF0
 //LED2      PF1
 //LED3      PF2
@@ -53,6 +53,6 @@
 #define  	LED8_REVERSE  	GPIO_WriteBit(GPIOF, GPIO_Pin_7, (BitAction)!GPIO_ReadOutputDataBit(GPIOF, GPIO_Pin_7))
 
 
-void LEDGpio_Init(void);
+void LED_Init(void);
 
 #endif

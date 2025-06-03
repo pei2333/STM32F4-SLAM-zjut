@@ -3,74 +3,26 @@
 #include <math.h>
 #include <stddef.h>
 
-// 强制定义 STM32F4XX 宏
-#ifndef STM32F4XX
+// 强制启用STM32功能 - 修复I2C被禁用的致命问题
 #define STM32F4XX
-#endif
+#define ENABLE_STM32_I2C
 
-// STM32 库文件包含 - 使用条件编译确保兼容性
-#if defined(STM32F4XX)
-    #include "stm32f4xx.h"
-    #include "stm32f4xx_i2c.h"
-    #include "stm32f4xx_rcc.h"
-    #include "stm32f4xx_gpio.h"
-    #include "misc.h"
-    
-    #define I2C_PORT            I2C1
-    #define I2C_CLOCK           RCC_APB1Periph_I2C1
-    #define GPIO_CLOCK          RCC_AHB1Periph_GPIOB
-    #define SCL_PIN             GPIO_Pin_6
-    #define SDA_PIN             GPIO_Pin_7
-    #define SCL_PIN_SOURCE      GPIO_PinSource6
-    #define SDA_PIN_SOURCE      GPIO_PinSource7
-    #define GPIO_PORT           GPIOB
-    #define I2C_AF              GPIO_AF_I2C1
-#else
-    // 如果没有STM32库，定义基本类型和函数
-    typedef struct { int dummy; } GPIO_InitTypeDef;
-    typedef struct { int dummy; } I2C_InitTypeDef;
-    typedef struct { int dummy; } NVIC_InitTypeDef;
-    
-    #define ENABLE  1
-    #define DISABLE 0
-    #define SET     1
-    #define RESET   0
-    
-    // 定义空函数防止编译错误
-    static void RCC_APB1PeriphClockCmd(uint32_t periph, int state) { (void)periph; (void)state; }
-    static void RCC_AHB1PeriphClockCmd(uint32_t periph, int state) { (void)periph; (void)state; }
-    static void GPIO_Init(void* port, GPIO_InitTypeDef* init) { (void)port; (void)init; }
-    static void GPIO_PinAFConfig(void* port, uint8_t pin, uint8_t af) { (void)port; (void)pin; (void)af; }
-    static void I2C_DeInit(void* i2c) { (void)i2c; }
-    static void I2C_Init(void* i2c, I2C_InitTypeDef* init) { (void)i2c; (void)init; }
-    static void I2C_Cmd(void* i2c, int state) { (void)i2c; (void)state; }
-    static void NVIC_Init(NVIC_InitTypeDef* init) { (void)init; }
-    static int I2C_GetFlagStatus(void* i2c, uint32_t flag) { (void)i2c; (void)flag; return 0; }
-    static void I2C_GenerateSTART(void* i2c, int state) { (void)i2c; (void)state; }
-    static void I2C_Send7bitAddress(void* i2c, uint8_t addr, uint8_t dir) { (void)i2c; (void)addr; (void)dir; }
-    static void I2C_SendData(void* i2c, uint8_t data) { (void)i2c; (void)data; }
-    static void I2C_GenerateSTOP(void* i2c, int state) { (void)i2c; (void)state; }
-    static void I2C_AcknowledgeConfig(void* i2c, int state) { (void)i2c; (void)state; }
-    static uint8_t I2C_ReceiveData(void* i2c) { (void)i2c; return 0; }
-    
-    #define I2C_PORT            ((void*)0)
-    #define I2C_CLOCK           0
-    #define GPIO_CLOCK          0
-    #define SCL_PIN             0
-    #define SDA_PIN             0
-    #define SCL_PIN_SOURCE      0
-    #define SDA_PIN_SOURCE      0
-    #define GPIO_PORT           ((void*)0)
-    #define I2C_AF              0
-    #define I2C_FLAG_BUSY       0
-    #define I2C_FLAG_SB         0
-    #define I2C_FLAG_ADDR       0
-    #define I2C_FLAG_BTF        0
-    #define I2C_FLAG_RXNE       0
-    #define I2C_Direction_Transmitter  0
-    #define I2C_Direction_Receiver     0
-    #define I2C1_EV_IRQn        0
-#endif
+// STM32 库文件包含
+#include "stm32f4xx.h"
+#include "stm32f4xx_i2c.h"
+#include "stm32f4xx_rcc.h"
+#include "stm32f4xx_gpio.h"
+#include "misc.h"
+
+#define I2C_PORT            I2C1
+#define I2C_CLOCK           RCC_APB1Periph_I2C1
+#define GPIO_CLOCK          RCC_AHB1Periph_GPIOB
+#define SCL_PIN             GPIO_Pin_6
+#define SDA_PIN             GPIO_Pin_7
+#define SCL_PIN_SOURCE      GPIO_PinSource6
+#define SDA_PIN_SOURCE      GPIO_PinSource7
+#define GPIO_PORT           GPIOB
+#define I2C_AF              GPIO_AF_I2C1
 
 // ADXL345 寄存器地址定义
 #define ADXL345_ADDR            0x53    // ADXL345 器件地址
@@ -176,7 +128,6 @@ static int8_t ADXL345_WaitForFlag(uint32_t flag, bool state)
  */
 static int8_t I2C_Configuration(void)
 {
-#if defined(STM32F4XX) && !defined(DISABLE_STM32_FEATURES)
     GPIO_InitTypeDef GPIO_InitStructure;
     I2C_InitTypeDef I2C_InitStructure;
     NVIC_InitTypeDef NVIC_InitStructure;
@@ -218,7 +169,6 @@ static int8_t I2C_Configuration(void)
 
     // 使能I2C
     I2C_Cmd(I2C_PORT, ENABLE);
-#endif
 
     return ADXL345_SUCCESS;
 }

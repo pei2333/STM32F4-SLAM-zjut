@@ -48,6 +48,20 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+// 系统变量声明
+static volatile uint32_t system_ms_counter = 0;  // 系统毫秒计数器
+static volatile uint32_t tim3_adxl345_errors = 0;  // TIM3 ADXL345错误计数
+
+// UART5错误统计结构体
+typedef struct {
+    uint32_t overflow_count;
+    uint32_t overrun_count;
+    uint32_t frame_error_count;
+    uint32_t crc_error_count;
+} UART5_ErrorStats;
+
+static volatile UART5_ErrorStats uart5_errors = {0};
+
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -155,6 +169,13 @@ void SysTick_Handler(void)
     
     // LVGL时钟节拍更新
     lv_tick_inc(1);
+    
+    // 系统毫秒计数器
+    if(system_ms_counter < 0xFFFFFFFF) {
+        system_ms_counter++;
+    } else {
+        system_ms_counter = 0;
+    }
     
     // LED4状态指示（500ms闪烁）
     static unsigned int led_cnt = 0;

@@ -3,27 +3,25 @@
 #include "delay.h"
 #include "led.h"
 /*********************************************************************************************************
-//I2C引脚定义
-//SCL	GPIO_Pin_2
-//SDA	GPIO_Pin_4
+// 修复I2C引脚冲突问题：
+// ADXL345: I2C1, PB6(SCL)/PB7(SDA) - 标准硬件I2C
+// MLX90640: 软件I2C, PB8(SCL)/PB9(SDA) - 避免与ADXL345冲突
 *********************************************************************************************************/
-//SCL		PG2
-#define  	SCL_L      		GPIO_ResetBits(GPIOG, GPIO_Pin_2)
-#define  	SCL_H      		GPIO_SetBits(GPIOG, GPIO_Pin_2)
+//SCL		PB8 (修改为避免与ADXL345冲突)
+#define  	SCL_L      		GPIO_ResetBits(GPIOB, GPIO_Pin_8)
+#define  	SCL_H      		GPIO_SetBits(GPIOB, GPIO_Pin_8)
 
-//SDA		PG4
-#define  	SDA_L      		GPIO_ResetBits(GPIOG, GPIO_Pin_4)
-#define  	SDA_H      		GPIO_SetBits(GPIOG, GPIO_Pin_4)
+//SDA		PB9 (修改为避免与ADXL345冲突)
+#define  	SDA_L      		GPIO_ResetBits(GPIOB, GPIO_Pin_9)
+#define  	SDA_H      		GPIO_SetBits(GPIOB, GPIO_Pin_9)
 
-#define  	SDA_READ()     	GPIO_ReadInputDataBit(GPIOG, GPIO_Pin_4)
+#define  	SDA_READ()     	GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_9)
 
+// 优化I2C时序参数
+static unsigned int I2C_delayTime = 5;      // 减少延时提高速度
+static unsigned int I2C_Freq = 400;         // 400kHz频率
 
-static unsigned int I2C_delayTime = 10;
-static unsigned int I2C_Freq = 800; // 400kHz
-// static unsigned int I2C_Freq = 2000;
-
-static uint8_t i2cData[1664] = {0}; // 832 * 2，这里的1664是根据MLX90640_PIXEL_NUM * 2得到的
-
+static uint8_t i2cData[1664] = {0}; // 832 * 2，MLX90640数据缓冲区
 
 void I2C_GPIO_Configuration(void);
 void I2C_SDA_Input(void);
@@ -39,7 +37,7 @@ int I2C_SendByte(unsigned char dat);
 unsigned char I2C_ReceiveByte(void);
 void I2C_ReceiveBytes(int nBytes, uint8_t *dataP);
 
-void MLX90640_I2CInit(void){
+void MLX90640_Init(void){
     I2C_GPIO_Configuration();
 }
 
@@ -168,14 +166,17 @@ void MLX90640_I2CFreqSet(int freq){ // freq in kHz
 
 void I2C_GPIO_Configuration(void){
     GPIO_InitTypeDef  GPIO_InitStructure;
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOG, ENABLE);   //使能GPIOB时钟
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2|GPIO_Pin_4;    //LED对应引脚
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;           //通用输出模式
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;          //输出推挽
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;      //100MHz
-//    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;        //无上拉或下拉
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_Init(GPIOG, &GPIO_InitStructure);
+    
+    // 使能GPIOB时钟 (ADXL345和MLX90640都使用GPIOB不同引脚)
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
+    
+    // 配置PB8(SCL), PB9(SDA)作为开漏输出
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;  // 开漏输出，支持I2C协议
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;    // 内部上拉
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
     
     I2C_Stop();
 }
@@ -183,21 +184,21 @@ void I2C_GPIO_Configuration(void){
 void I2C_SDA_Input(void){
     GPIO_InitTypeDef GPIO_InitStructure;
 	
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;    // 上拉
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-    GPIO_Init(GPIOG, &GPIO_InitStructure);
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
 }
 void I2C_SDA_Output(void){
     GPIO_InitTypeDef GPIO_InitStructure;
 
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOG, &GPIO_InitStructure);
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
 }
 void I2C_Delay(void)
 {

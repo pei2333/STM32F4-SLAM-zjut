@@ -2,21 +2,21 @@
 ** Created by:          qinyx
 ** Last modified Date:  2014-02-28
 ** Last Version:        V1.00
-** Descriptions:        STM32F407Ç¶ÈëÊ½ÊµÑéÏä
-**	  GpioÅäÖÃÎÄ¼ş
+** Descriptions:        STM32F407Ç¶ï¿½ï¿½Ê½Êµï¿½ï¿½ï¿½ï¿½
+**	  Gpioï¿½ï¿½ï¿½ï¿½ï¿½Ä¼ï¿½
 **
 **-------------------------------------------------------------------------------------------*/
 #include "stm32f4xx.h"
 #include "LED.h"
 
 /*************************************************************************
-*º¯ÊıÃû³Æ£ºvoid LEDGpio_Init(void)
+*å‡½æ•°åç§°ï¼švoid LED_Init(void)
 *
-*Èë¿Ú²ÎÊı£ºÎŞ
+*å…¥å£å‚æ•°ï¼šæ— 
 *
-*³ö¿Ú²ÎÊı£ºÎŞ
+*å‡ºå£å‚æ•°ï¼šæ— 
 *
-*¹¦ÄÜËµÃ÷£ºLED³õÊ¼»¯
+*åŠŸèƒ½è¯´æ˜ï¼šLEDåˆå§‹åŒ–
 //LED1      PF0
 //LED2      PF1
 //LED3      PF2
@@ -26,18 +26,18 @@
 //LED7      PF6
 //LED8      PF7
 *************************************************************************/
-void LEDGpio_Init(void)
+void LED_Init(void)
 {    
     GPIO_InitTypeDef  GPIO_InitStructure;
     
     //  LED
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOF, ENABLE);   //Ê¹ÄÜGPIOBÊ±ÖÓ
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3|GPIO_Pin_4|GPIO_Pin_5|GPIO_Pin_6|GPIO_Pin_7;//LED¶ÔÓ¦Òı½Å
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;           //Í¨ÓÃÊä³öÄ£Ê½
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;          //Êä³öÍÆÍì
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOF, ENABLE);   //Ê¹ï¿½ï¿½GPIOBÊ±ï¿½ï¿½
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3|GPIO_Pin_4|GPIO_Pin_5|GPIO_Pin_6|GPIO_Pin_7;//LEDï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;           //Í¨ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;          //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;      //100MHz
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;        //ÎŞÉÏÀ­»òÏÂÀ­
-    GPIO_Init(GPIOF, &GPIO_InitStructure);                  //³õÊ¼»¯ GPIO
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    GPIO_Init(GPIOF, &GPIO_InitStructure);                  //ï¿½ï¿½Ê¼ï¿½ï¿½ GPIO
     
     LED1_OFF;
     LED2_OFF;

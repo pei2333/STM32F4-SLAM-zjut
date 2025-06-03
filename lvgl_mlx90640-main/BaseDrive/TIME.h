@@ -4,10 +4,10 @@
 #include <stdint.h>
 
 // TIM2定时器函数（1ms中断）
-void TIM2_Configuration(void);
+void TIM2_Init(void);
 
 // TIM3定时器函数（可配置频率，默认200Hz）
-void TIM3_Configuration(void);
+void TIM3_Init(void);
 void TIM3_Stop(void);
 void TIM3_Start(void);
 int8_t TIM3_SetFrequency(uint32_t frequency_hz);

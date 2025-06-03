@@ -8,35 +8,32 @@
 unsigned char Uart3ReceiveBuf[300] = {0};
 unsigned char Uart5ReceiveBuf[1544] = {0};
 
-//  �ṹ�嶨��
+//  结构体定义
 USARTDATA   Uart3;
 USARTDATA   Uart6;
 USARTDATA   Uart5;
 /**********************************************************************************************************
-�������ƣ�UART3����
-�����������
-�����������
-�������أ���
+函数名称：UART3初始化
+输入参数：无
+输出参数：无
 **********************************************************************************************************/
 // USART3_TX	 PB10	//  out
 // USART3_RX	 PB11	//  in
-void UART3_Configuration(void)
+void UART3_Init(void)
 {
     GPIO_InitTypeDef    GPIO_InitStructure;
 	USART_InitTypeDef   USART_InitStructure;
 
-    //Uart3��ʼ�� 
-    Uart3.ReceiveFinish = 0;// ��ReceiveFinish��־λ����Ϊ0����ʾδ�������
-    Uart3.RXlenth = 0;// �����ճ�������Ϊ0
-    Uart3.Time = 0;// ��ʱ�����������Ϊ0
-    Uart3.Rxbuf = Uart3ReceiveBuf;// �����ջ�����ָ��ReceiveBuffer
+    //Uart3初始化 
+    Uart3.ReceiveFinish = 0;// 将ReceiveFinish标志位置设为0，表示未接收完成
+    Uart3.RXlenth = 0;// 接收长度计数清零为0
+    Uart3.Time = 0;// 超时计数器清零为0
+    Uart3.Rxbuf = Uart3ReceiveBuf;// 接收缓冲区指向ReceiveBuffer
 
-
-
-	//  ����GPIO_D��ʱ�� 
+	//  使能GPIO_D时钟 
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
     
-	//  ��������3��ʱ�� 
+	//  使能USART3时钟 
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE);
 
 	GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AF;
@@ -63,20 +60,19 @@ void UART3_Configuration(void)
 
 	USART_Init(USART3, &USART_InitStructure);
 
-	/* ʹ�ܴ���3 */
+	/* 启用中断3 */
 	USART_Cmd(USART3, ENABLE);
 	USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
 }
 
 /**********************************************************************************************************
-�������ƣ�putchar�����ض���
-�����������
-�����������
-�������أ���
+函数名称：putchar重定向函数
+输入参数：无
+输出参数：无
 **********************************************************************************************************/
 int fputc(int ch, FILE *f)
 {
-    USART3->SR;                                                         // ��ֹ��λ���޷���ӡ���ַ�
+    USART3->SR;                                                         // 清除发送完成标志位，不能发送字符
     
     USART_SendData(USART3, (u8) ch);
     while(USART_GetFlagStatus(USART3, USART_FLAG_TC) == RESET)
@@ -88,22 +84,22 @@ int fputc(int ch, FILE *f)
 }
 // int fputc(int ch, FILE *f)
 // {
-//     UART5->SR;// ��ȡ״̬�Ĵ�������ֹ��λ���޷���ӡ���ַ�                                                         // ��ֹ��λ���޷���ӡ���ַ�
+//     UART5->SR;// 获取状态寄存器，清除发送完成标志位，不能发送字符                                                         // 清除发送完成标志位，不能发送字符
     
-//     USART_SendData(UART5, (u8) ch); // ͨ��USART3����һ���ַ�
-//     while(USART_GetFlagStatus(UART5, USART_FLAG_TC) == RESET)// �ȴ��������
+//     USART_SendData(UART5, (u8) ch); // 通过USART3发送一个字符
+//     while(USART_GetFlagStatus(UART5, USART_FLAG_TC) == RESET)// 等待发送完成
 //     {
 //         ; 
 //     }
     
-//     return (ch); // ���ط��͵��ַ�
+//     return (ch); // 返回发送的字符
 // }
 
 
 /**********************************************************************************************************
-�������ƣ�USART3�������ݺ���
-������������������׵�ַ�����ݳ���
-�����������
+函数名称：USART3发送数据函数
+输入参数：数据指针，数据长度
+输出参数：无
 **********************************************************************************************************/
 void USART3_Senddata(unsigned char *Data, unsigned int length)
 {
@@ -115,44 +111,43 @@ void USART3_Senddata(unsigned char *Data, unsigned int length)
 }
 
 /**********************************************************************************************************
-�������ƣ�UART6����
-�����������
-�����������
-�������أ���
+函数名称：UART6初始化
+输入参数：波特率
+输出参数：无
 **********************************************************************************************************/
 // USART6_TX	 PC6	//  out
 // USART6_RX	 PC7	//  in
-void UART6_Configuration(unsigned int baud)
+void UART6_Init(unsigned int baud)
 {
-	//  GPIO��ʼ������
-	//  USART��ʼ������
-	//  NVIC��ʼ������
+	//  GPIO初始化
+	//  USART初始化
+	//  NVIC初始化
     
     // Uart6.ReceiveFinish = 0;
     // Uart6.RXlenth = 0;
     // Uart6.Time = 0;
     // Uart6.Rxbuf = Uart6ReceiveBuf;
 
-	// //  ����GPIOA��ʱ�� 
+	// //  使用GPIOA时钟 
 	// RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
     
-	//  ��������6��ʱ�� 
+	//  使用USART6时钟 
 	
-	/*  ʱ��ʹ��
+	/*  使用
 			
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART6, ENABLE);
 			
-			GPIO��ʼ��������6��7��
+			GPIO初始化GPIO6和7
 			
-			GPIO��������
+			GPIO配置
 
-			USART��ʼ��
+			USART初始化
 	USART_InitStructure.USART_BaudRate   = baud;
 	
 
 	USART_Init(USART6, &USART_InitStructure);
 
-	/* ʹ�ܴ���6 */
+	/* 启用中断6 */
 	
 
     /* NVIC configuration */
@@ -167,9 +162,9 @@ void UART6_Configuration(unsigned int baud)
 }
 
 /**********************************************************************************************************
-�������ƣ�USART6�������ݺ���
-������������������׵�ַ�����ݳ���
-�����������
+函数名称：USART6发送数据函数
+输入参数：数据指针，数据长度
+输出参数：无
 **********************************************************************************************************/
 void USART6_Senddata(unsigned char *Data, unsigned int length)
 {
@@ -181,10 +176,9 @@ void USART6_Senddata(unsigned char *Data, unsigned int length)
 }
 
 /**********************************************************************************************************
-�������ƣ�UART1	����
-�����������
-�����������
-�������أ���
+函数名称：UART1	初始化
+输入参数：无
+输出参数：无
 **********************************************************************************************************/
 // USART5_TX	 PC12	//  out
 // USART5_RX	 PD2	//  in
@@ -193,7 +187,7 @@ void USART6_Senddata(unsigned char *Data, unsigned int length)
  * @brief 配置UART5
  * @param baudrate 波特率
  */
-void UART5_Configuration(uint32_t baudrate)
+void UART5_Init(uint32_t baudrate)
 {
     GPIO_InitTypeDef GPIO_InitStructure;
     USART_InitTypeDef USART_InitStructure;
@@ -205,7 +199,7 @@ void UART5_Configuration(uint32_t baudrate)
     Uart5.Time = 0;
     Uart5.Rxbuf = Uart5ReceiveBuf;
 
-    // 使能时钟
+    // 启用时钟
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC | RCC_AHB1Periph_GPIOD, ENABLE);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART5, ENABLE);
 
@@ -240,7 +234,7 @@ void UART5_Configuration(uint32_t baudrate)
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 
-    // 使能UART5和中断
+    // 启用UART5和中断
     USART_ITConfig(UART5, USART_IT_RXNE, ENABLE);
     USART_ITConfig(UART5, USART_IT_ORE, ENABLE);  // 溢出错误中断
     USART_Cmd(UART5, ENABLE);

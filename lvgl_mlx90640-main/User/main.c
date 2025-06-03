@@ -82,14 +82,6 @@ static GridMap    slam_map;
 static DynamicMap dynamic_map;
 static volatile uint8_t slam_running = 1;  // SLAM 开始/停止标志
 
-// 串口接收缓冲区
-#define UART5_RX_BUF_SIZE 108
-static uint8_t uart5_rx_buf[UART5_RX_BUF_SIZE];
-static volatile uint16_t uart5_rx_index = 0;
-
-// 串口 DMA/中断完成标志
-#define UART5_ReceiveFinish (uart5_rx_index >= UART5_RX_BUF_SIZE)
-
 // LVGL 对象
 static lv_obj_t *map_canvas;
 static lv_obj_t *info_label;
@@ -223,9 +215,13 @@ static void enhancedUpdateMapWithLaserData(GridMap *map,
     worldToMap(map, pose->x * MAP_RESOLUTION, pose->y * MAP_RESOLUTION,
                &robot_x_map, &robot_y_map);
 
+    // 获取UART5接收缓冲区
+    uint8_t *uart_buffer = UART5_GetReceiveBuffer();
+    if(uart_buffer == NULL) return;
+
     // 解析起始/终止角度
-    uint16_t start_raw = (uint16_t)(uart5_rx_buf[5] << 8) | uart5_rx_buf[6];
-    uint16_t stop_raw  = (uint16_t)(uart5_rx_buf[103] << 8) | uart5_rx_buf[104];
+    uint16_t start_raw = (uint16_t)(uart_buffer[5] << 8) | uart_buffer[6];
+    uint16_t stop_raw  = (uint16_t)(uart_buffer[103] << 8) | uart_buffer[104];
     float start_deg = start_raw * 0.01f;
     float stop_deg  = stop_raw  * 0.01f;
     float diff_deg = stop_deg - start_deg;
@@ -233,9 +229,9 @@ static void enhancedUpdateMapWithLaserData(GridMap *map,
     float step_deg = diff_deg / (num_points - 1);
 
     for (int i = 0; i < num_points; i++) {
-        uint16_t dist = (uint16_t)(uart5_rx_buf[7 + i*3] << 8)
-                      | uart5_rx_buf[8 + i*3];
-        uint8_t intensity = uart5_rx_buf[9 + i*3];
+        uint16_t dist = (uint16_t)(uart_buffer[7 + i*3] << 8)
+                      | uart_buffer[8 + i*3];
+        uint8_t intensity = uart_buffer[9 + i*3];
 
         float angle_deg = start_deg + step_deg * i;
         if (angle_deg >= 360.0f) angle_deg -= 360.0f;
@@ -527,32 +523,33 @@ void SLAM_Process(void)
     }
 
     // 读取激光雷达数据
-    if(UART5_ReceiveFinish) {
+    if(UART5_IsReceiveFinished()) {
         enhancedUpdateMapWithLaserData(&slam_map,
                                        &dynamic_map,
                                        &robot_pose,
                                        laser_points,
                                        LASER_POINT_COUNT);
-        UART5_ReceiveFinish = 0;
+        UART5_ClearReceiveFlag();  // 清除接收标志
     }
 
     // 更新地图显示
-    updateMapDisplay();
+    drawMap();
 }
 
 /**
- * @brief 系统全局初始化：延时、LED、UART5、ADXL345、TIM3、地图、LVGL
+ * @brief 系统全局初始化：延时、LED、KEY、UART、ADXL345、TIM3、地图、LVGL
  */
 void SystemInit(void)
 {
     delay_init();
     LED_Init();
+    KEY_Init();
 
     // 初始化调试串口
-    UART3_Configuration();
+    UART3_Init();
 
     // USART5 用于雷达
-    UART5_Configuration(460800);
+    UART5_Init(460800);
 
     // 初始化ADXL345加速度计（使用新的I2C接口）
     if(ADXL345_Init() != ADXL345_SUCCESS) {
@@ -566,12 +563,15 @@ void SystemInit(void)
         }
     }
 
+    // 不再初始化MLX90640热成像模块 - 用户不需要
+    // MLX90640_Init();
+
     // 定时器配置
-    TIM3_Configuration();
+    TIM3_Init();
 
     // 初始化地图
-    initMap();
-    initDynamicMap();
+    initMap(&slam_map);
+    initDynamicMap(&dynamic_map);
 
     // 初始化LVGL
     lv_init();
@@ -598,4 +598,40 @@ int main(void)
         delay_ms(5);
     }
     // return 0; // 虽然不会走到这里
+}
+
+/**
+ * @brief 初始化栅格地图
+ */
+static void initMap(GridMap *map)
+{
+    if(map == NULL) return;
+    
+    // 清空地图
+    for(int x = 0; x < MAP_SIZE_X; x++) {
+        for(int y = 0; y < MAP_SIZE_Y; y++) {
+            map->cells[x][y] = CELL_UNKNOWN;
+        }
+    }
+    
+    // 设置地图原点为中心
+    map->origin_x = MAP_SIZE_X / 2;
+    map->origin_y = MAP_SIZE_Y / 2;
+}
+
+/**
+ * @brief 初始化动态地图
+ */
+static void initDynamicMap(DynamicMap *dmap)
+{
+    if(dmap == NULL) return;
+    
+    // 清空动态地图
+    for(int x = 0; x < MAP_SIZE_X; x++) {
+        for(int y = 0; y < MAP_SIZE_Y; y++) {
+            dmap->hit_count[x][y] = 0;
+            dmap->scan_count[x][y] = 0;
+            dmap->dynamic_cells[x][y] = CELL_UNKNOWN;
+        }
+    }
 }
