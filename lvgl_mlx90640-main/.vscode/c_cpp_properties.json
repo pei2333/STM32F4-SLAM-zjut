@@ -1,0 +1,26 @@
+{
+  "configurations": [
+    {
+      "name": "windows-gcc-x64",
+      "includePath": [
+        "${workspaceFolder}/**",
+        "${workspaceFolder}/Libraries/CMSIS/Device/ST/STM32F4xx/Include",
+        "${workspaceFolder}/Libraries/CMSIS/Include",
+        "${workspaceFolder}/Libraries/STM32F4xx_StdPeriph_Driver/inc",
+        "${workspaceFolder}/lvgl",
+        "${workspaceFolder}/lvgl/src",
+        "${workspaceFolder}/User",
+        "${workspaceFolder}/BaseDrive"
+      ],
+      "compilerPath": "D:/qqtt/Tools/mingw810_64/bin/gcc.exe",
+      "cStandard": "c11",
+      "cppStandard": "c++14",
+      "intelliSenseMode": "windows-gcc-x64",
+      "compilerArgs": [
+        "-DSTM32F407xx",
+        "-DUSE_STDPERIPH_DRIVER"
+      ]
+    }
+  ],
+  "version": 4
+}

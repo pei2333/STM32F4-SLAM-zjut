@@ -1,0 +1,15 @@
+.\obj\qrcodegen.o: ..\lvgl\src\extra\libs\qrcode\qrcodegen.c
+.\obj\qrcodegen.o: D:\Keil MDK\ARM\ARMCC\Bin\..\include\limits.h
+.\obj\qrcodegen.o: D:\Keil MDK\ARM\ARMCC\Bin\..\include\stdlib.h
+.\obj\qrcodegen.o: D:\Keil MDK\ARM\ARMCC\Bin\..\include\string.h
+.\obj\qrcodegen.o: ..\lvgl\src\extra\libs\qrcode\qrcodegen.h
+.\obj\qrcodegen.o: D:\Keil MDK\ARM\ARMCC\Bin\..\include\stdbool.h
+.\obj\qrcodegen.o: D:\Keil MDK\ARM\ARMCC\Bin\..\include\stddef.h
+.\obj\qrcodegen.o: D:\Keil MDK\ARM\ARMCC\Bin\..\include\stdint.h
+.\obj\qrcodegen.o: ..\lvgl\src\extra\libs\qrcode\../../../misc/lv_assert.h
+.\obj\qrcodegen.o: ..\lvgl\src\extra\libs\qrcode\../../../misc/../lv_conf_internal.h
+.\obj\qrcodegen.o: ..\lvgl\src\extra\libs\qrcode\../../../misc/../lv_conf_kconfig.h
+.\obj\qrcodegen.o: ..\lvgl\examples\porting\../../lv_conf.h
+.\obj\qrcodegen.o: ..\lvgl\src\extra\libs\qrcode\../../../misc/lv_log.h
+.\obj\qrcodegen.o: ..\lvgl\src\extra\libs\qrcode\../../../misc/lv_types.h
+.\obj\qrcodegen.o: ..\lvgl\src\extra\libs\qrcode\../../../misc/lv_mem.h
