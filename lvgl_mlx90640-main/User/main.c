@@ -26,6 +26,7 @@
 #include "lcd.h"
 #include "../BaseDrive/TOUCH/touch.h"
 #include "../BaseDrive/USART.h"
+#include "../BaseDrive/TIME.h"
 #include "adxl345.h"
 
 /**********************************************************************************************************
@@ -96,6 +97,10 @@ static lv_obj_t *info_label;
 
 // 地图显示缓冲区 (240×240×2B ≈ 112.5KB，请放到外部 SRAM)
 static lv_color_t map_display_buffer[MAP_SIZE_X * MAP_SIZE_Y];
+
+// 前置声明
+static void initMap(GridMap *map);
+static void initDynamicMap(DynamicMap *dmap);
 
 /**
  * @brief  将实际世界坐标转换为地图格子索引
@@ -342,7 +347,7 @@ static void update_map_display(lv_timer_t *timer)
 static void start_stop_event_cb(lv_event_t *e)
 {
     lv_obj_t *btn   = lv_event_get_target(e);
-    lv_obj_t *label = lv_obj_get_child(btn, NULL);
+    lv_obj_t *label = lv_obj_get_child(btn, 0);
 
     slam_running = !slam_running;
     if (slam_running) {
