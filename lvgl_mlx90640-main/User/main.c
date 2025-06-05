@@ -508,9 +508,9 @@ void SLAM_Process(void)
         position_x += velocity_x * dt;
         position_y += velocity_y * dt;
         
-        // 更新机器人位置（转换为地图坐标）
-        robot_pose.x = (int)(position_x * 100);  // 转换为cm
-        robot_pose.y = (int)(position_y * 100);
+        // 更新机器人位置（将米转换为毫米并除以单元格大小）
+        robot_pose.x = position_x * 1000.0f / MAP_RESOLUTION;
+        robot_pose.y = position_y * 1000.0f / MAP_RESOLUTION;
         
         // 限制在地图范围内
         if(robot_pose.x < 0) robot_pose.x = 0;
