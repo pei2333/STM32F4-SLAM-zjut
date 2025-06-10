@@ -1,0 +1,11 @@
+*** Using Compiler 'V5.06 update 1 (build 61)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
+Build target 'Template'
+compiling main.c...
+..\User\main.c(342): warning:  #177-D: variable "last_uart_check" was declared but never referenced
+  	uint32_t last_uart_check = 0;
+..\User\main.c: 1 warning, 0 errors
+linking...
+Program Size: Code=22768 RO-data=6552 RW-data=108 ZI-data=7132  
+FromELF: creating hex file...
+".\Obj\PWM.axf" - 0 Error(s), 1 Warning(s).
+Build Time Elapsed:  00:00:02
